@@ -20,7 +20,10 @@ import {
   doc
 } from "firebase/firestore";
 
-import { db } from "@/firebase/config";
+import {
+  db,
+  firebaseConfigError
+} from "@/firebase/config";
 
 export default function DashboardPage() {
 
@@ -60,6 +63,10 @@ export default function DashboardPage() {
       return alert("Fill all fields");
     }
 
+    if (!db) {
+      return alert(firebaseConfigError);
+    }
+
     try {
 
       await addDoc(
@@ -84,6 +91,11 @@ export default function DashboardPage() {
   // GET NOTES REALTIME
   useEffect(() => {
 
+    if (!db) {
+      console.error(firebaseConfigError);
+      return;
+    }
+
     const unsubscribe =
     onSnapshot(
       collection(db, "notes"),
@@ -107,6 +119,10 @@ export default function DashboardPage() {
   const deleteNote = async (id) => {
 
     try {
+
+      if (!db) {
+        return alert(firebaseConfigError);
+      }
 
       await deleteDoc(
         doc(db, "notes", id)

@@ -12,6 +12,7 @@ import {
 
 import {
   auth,
+  firebaseConfigError,
   googleProvider
 } from "@/firebase/config";
 
@@ -27,6 +28,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     if (!email || !password) return alert("Fill all fields");
     if (loading) return;
+    if (!auth) return alert(firebaseConfigError);
 
     try {
       setLoading(true);
@@ -42,6 +44,7 @@ export default function LoginPage() {
 
   const googleLogin = async () => {
     if (loading || popupInProgress.current) return;
+    if (!auth || !googleProvider) return alert(firebaseConfigError);
 
     try {
       popupInProgress.current = true;

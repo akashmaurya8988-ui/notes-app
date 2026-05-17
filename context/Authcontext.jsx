@@ -10,7 +10,10 @@ import {
   useState
 } from "react";
 
-import { auth } from "@/firebase/config";
+import {
+  auth,
+  firebaseConfigError
+} from "@/firebase/config";
 
 export const AuthContext =
 createContext();
@@ -23,9 +26,14 @@ export const AuthProvider = ({
   useState(null);
 
   const [loading, setLoading] =
-  useState(true);
+  useState(Boolean(auth));
 
   useEffect(() => {
+
+    if (!auth) {
+      console.error(firebaseConfigError);
+      return;
+    }
 
     const unsubscribe =
     onAuthStateChanged(auth,

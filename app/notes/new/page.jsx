@@ -8,7 +8,10 @@ import {
   collection
 } from "firebase/firestore";
 
-import { db } from "@/firebase/config";
+import {
+  db,
+  firebaseConfigError
+} from "@/firebase/config";
 
 import { useRouter }
 from "next/navigation";
@@ -31,6 +34,10 @@ export default function NewNotePage() {
 
     if (!title || !content) {
       return alert("Fill all fields");
+    }
+
+    if (!db) {
+      return alert(firebaseConfigError);
     }
 
     try {

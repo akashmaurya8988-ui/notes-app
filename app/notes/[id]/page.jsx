@@ -17,7 +17,10 @@ import {
   deleteDoc
 } from "firebase/firestore";
 
-import { db } from "@/firebase/config";
+import {
+  db,
+  firebaseConfigError
+} from "@/firebase/config";
 
 import { useParams, useRouter }
 from "next/navigation";
@@ -46,6 +49,12 @@ export default function NoteDetailsPage() {
   useEffect(() => {
 
     const getNote = async () => {
+
+      if (!db) {
+        console.error(firebaseConfigError);
+        setLoading(false);
+        return;
+      }
 
       try {
 
@@ -87,6 +96,10 @@ export default function NoteDetailsPage() {
 
     try {
 
+      if (!db) {
+        return alert(firebaseConfigError);
+      }
+
       setSaving(true);
 
       await updateDoc(
@@ -114,6 +127,10 @@ export default function NoteDetailsPage() {
   const deleteNote = async () => {
 
     try {
+
+      if (!db) {
+        return alert(firebaseConfigError);
+      }
 
       await deleteDoc(
         doc(db, "notes", noteId)

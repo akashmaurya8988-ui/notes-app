@@ -8,7 +8,10 @@ import {
   createUserWithEmailAndPassword
 } from "firebase/auth";
 
-import { auth } from "@/firebase/config";
+import {
+  auth,
+  firebaseConfigError
+} from "@/firebase/config";
 
 import { useRouter }
 from "next/navigation";
@@ -30,6 +33,10 @@ export default function SignupPage() {
 
     if (!email || !password) {
       return alert("Fill all fields");
+    }
+
+    if (!auth) {
+      return alert(firebaseConfigError);
     }
 
     try {

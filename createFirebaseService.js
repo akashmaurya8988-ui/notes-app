@@ -49,26 +49,26 @@ export const isFirebaseConfigured =
 const app =
   isFirebaseConfigured
     ? createFirebaseService(() =>
-      getApps().length
-        ? getApp()
-        : initializeApp(firebaseConfig)
-    )
+        getApps().length
+          ? getApp()
+          : initializeApp(firebaseConfig)
+      )
     : null;
 
 // AUTH
 export const auth =
   app
     ? createFirebaseService(() =>
-      getAuth(app)
-    )
+        getAuth(app)
+      )
     : null;
 
 // FIRESTORE
 export const db =
   app
     ? createFirebaseService(() =>
-      getFirestore(app)
-    )
+        getFirestore(app)
+      )
     : null;
 
 // GOOGLE PROVIDER
