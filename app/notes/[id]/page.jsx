@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useState
+} from "react";
 
 import {
   ArrowLeft,
@@ -22,6 +26,10 @@ import {
   firebaseConfigError
 } from "@/firebase/config";
 
+import {
+  AuthContext
+} from "@/context/AuthContext";
+
 import { useParams, useRouter }
 from "next/navigation";
 
@@ -32,6 +40,11 @@ export default function NoteDetailsPage() {
   const router = useRouter();
 
   const noteId = params.id;
+
+  const {
+    user,
+    loading: authLoading
+  } = useContext(AuthContext);
 
   const [title, setTitle] =
   useState("");
@@ -49,6 +62,16 @@ export default function NoteDetailsPage() {
   useEffect(() => {
 
     const getNote = async () => {
+
+      if (authLoading) {
+        return;
+      }
+
+      if (!user) {
+        router.push("/login");
+        setLoading(false);
+        return;
+      }
 
       if (!db) {
         console.error(firebaseConfigError);
@@ -69,8 +92,17 @@ export default function NoteDetailsPage() {
           const data =
           docSnap.data();
 
+          if (data.ownerUid !== user.uid) {
+            alert("You do not have access to this note.");
+            router.push("/dashboard");
+            return;
+          }
+
           setTitle(data.title);
           setContent(data.content);
+        } else {
+
+          router.push("/dashboard");
 
         }
 
@@ -85,11 +117,11 @@ export default function NoteDetailsPage() {
       }
     };
 
-    if (noteId) {
+    if (noteId && !authLoading) {
       getNote();
     }
 
-  }, [noteId]);
+  }, [authLoading, noteId, router, user]);
 
   // UPDATE NOTE
   const updateNote = async () => {
@@ -100,6 +132,10 @@ export default function NoteDetailsPage() {
         return alert(firebaseConfigError);
       }
 
+      if (!user) {
+        return router.push("/login");
+      }
+
       setSaving(true);
 
       await updateDoc(
@@ -107,6 +143,9 @@ export default function NoteDetailsPage() {
         {
           title,
           content,
+          ownerUid: user.uid,
+          ownerEmail: user.email,
+          updatedAt: Date.now(),
         }
       );
 
@@ -130,6 +169,10 @@ export default function NoteDetailsPage() {
 
       if (!db) {
         return alert(firebaseConfigError);
+      }
+
+      if (!user) {
+        return router.push("/login");
       }
 
       await deleteDoc(

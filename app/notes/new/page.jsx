@@ -1,7 +1,11 @@
 "use client";
 import Editor from "@/components/Editor";
 
-import { useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useState
+} from "react";
 
 import {
   addDoc,
@@ -13,12 +17,21 @@ import {
   firebaseConfigError
 } from "@/firebase/config";
 
+import {
+  AuthContext
+} from "@/context/AuthContext";
+
 import { useRouter }
 from "next/navigation";
 
 export default function NewNotePage() {
 
   const router = useRouter();
+
+  const {
+    user,
+    loading: authLoading
+  } = useContext(AuthContext);
 
   const [title, setTitle] =
   useState("");
@@ -28,6 +41,14 @@ export default function NewNotePage() {
 
   const [loading, setLoading] =
   useState(false);
+
+  useEffect(() => {
+
+    if (!authLoading && !user) {
+      router.push("/login");
+    }
+
+  }, [authLoading, router, user]);
 
   // CREATE NOTE
   const createNote = async () => {
@@ -40,6 +61,10 @@ export default function NewNotePage() {
       return alert(firebaseConfigError);
     }
 
+    if (!user) {
+      return router.push("/login");
+    }
+
     try {
 
       setLoading(true);
@@ -49,6 +74,8 @@ export default function NewNotePage() {
         {
           title,
           content,
+          ownerUid: user.uid,
+          ownerEmail: user.email,
           createdAt: Date.now(),
         }
       );

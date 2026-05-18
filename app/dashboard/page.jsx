@@ -2,7 +2,11 @@
 
 import NoteCard from "@/components/NoteCard";
 
-import { useEffect, useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useState
+} from "react";
 
 import {
   Plus,
@@ -15,9 +19,11 @@ import {
 import {
   addDoc,
   collection,
-  onSnapshot,
   deleteDoc,
-  doc
+  doc,
+  onSnapshot,
+  query,
+  where
 } from "firebase/firestore";
 
 import {
@@ -25,7 +31,21 @@ import {
   firebaseConfigError
 } from "@/firebase/config";
 
+import {
+  AuthContext
+} from "@/context/AuthContext";
+
+import { useRouter }
+from "next/navigation";
+
 export default function DashboardPage() {
+
+  const router = useRouter();
+
+  const {
+    user,
+    loading: authLoading
+  } = useContext(AuthContext);
 
   const [title, setTitle] =
   useState("");
@@ -67,6 +87,10 @@ export default function DashboardPage() {
       return alert(firebaseConfigError);
     }
 
+    if (!user) {
+      return router.push("/login");
+    }
+
     try {
 
       await addDoc(
@@ -74,6 +98,8 @@ export default function DashboardPage() {
         {
           title,
           content,
+          ownerUid: user.uid,
+          ownerEmail: user.email,
           createdAt: Date.now(),
         }
       );
@@ -91,6 +117,15 @@ export default function DashboardPage() {
   // GET NOTES REALTIME
   useEffect(() => {
 
+    if (authLoading) {
+      return;
+    }
+
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
     if (!db) {
       console.error(firebaseConfigError);
       return;
@@ -98,14 +133,21 @@ export default function DashboardPage() {
 
     const unsubscribe =
     onSnapshot(
-      collection(db, "notes"),
+      query(
+        collection(db, "notes"),
+        where("ownerUid", "==", user.uid)
+      ),
       (snapshot) => {
 
         const data =
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .sort((a, b) =>
+            (b.createdAt || 0) - (a.createdAt || 0)
+          );
 
         setNotes(data);
       }
@@ -113,7 +155,7 @@ export default function DashboardPage() {
 
     return () => unsubscribe();
 
-  }, []);
+  }, [authLoading, router, user]);
 
   // DELETE NOTE
   const deleteNote = async (id) => {
@@ -122,6 +164,10 @@ export default function DashboardPage() {
 
       if (!db) {
         return alert(firebaseConfigError);
+      }
+
+      if (!user) {
+        return router.push("/login");
       }
 
       await deleteDoc(
