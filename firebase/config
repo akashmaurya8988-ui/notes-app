@@ -13,25 +13,12 @@ import {
   getFirestore
 } from "firebase/firestore";
 
-// ERROR MESSAGE
-export const firebaseConfigError =
-  "Firebase is not configured. Add all NEXT_PUBLIC_FIREBASE_* environment variables in Vercel.";
-
 const cleanEnv = (value) =>
   value
     ?.trim()
     .replace(/,$/, "")
     .replace(/^["']|["']$/g, "")
     .trim();
-
-const createFirebaseService = (factory) => {
-  try {
-    return factory();
-  } catch (error) {
-    console.error(firebaseConfigError, error);
-    return null;
-  }
-};
 
 const firebaseConfig = {
   apiKey: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_API_KEY),
@@ -45,30 +32,42 @@ const firebaseConfig = {
 export const isFirebaseConfigured =
   Object.values(firebaseConfig).every(Boolean);
 
+export const firebaseConfigError =
+  "Firebase is not configured. Add all NEXT_PUBLIC_FIREBASE_* environment variables in Vercel.";
+
+const createFirebaseService = (factory) => {
+  try {
+    return factory();
+  } catch (error) {
+    console.error(firebaseConfigError, error);
+    return null;
+  }
+};
+
 // INITIALIZE APP
 const app =
   isFirebaseConfigured
     ? createFirebaseService(() =>
-        getApps().length
-          ? getApp()
-          : initializeApp(firebaseConfig)
-      )
+      getApps().length
+        ? getApp()
+        : initializeApp(firebaseConfig)
+    )
     : null;
 
 // AUTH
 export const auth =
   app
     ? createFirebaseService(() =>
-        getAuth(app)
-      )
+      getAuth(app)
+    )
     : null;
 
 // FIRESTORE
 export const db =
   app
     ? createFirebaseService(() =>
-        getFirestore(app)
-      )
+      getFirestore(app)
+    )
     : null;
 
 // GOOGLE PROVIDER
