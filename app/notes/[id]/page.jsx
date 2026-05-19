@@ -26,9 +26,7 @@ import {
   firebaseConfigError
 } from "@/firebase/config.js";
 
-import {
-  AuthContext
-} from "@/context/AuthContext.jsx";
+import { AuthContext } from "@/context/AuthContext.jsx";
 
 import { useParams, useRouter }
 from "next/navigation";
