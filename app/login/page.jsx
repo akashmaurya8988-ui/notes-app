@@ -13,8 +13,9 @@ import {
 import {
   auth,
   firebaseConfigError,
+  getFirebaseAuthErrorMessage,
   googleProvider
-} from "@/firebase/config";
+} from "@/firebase/config.js";
 
 import { useRouter } from "next/navigation";
 
@@ -36,7 +37,7 @@ export default function LoginPage() {
       alert("Login Successful ✅");
       router.push("/dashboard");
     } catch (error) {
-      alert(error.message);
+      alert(getFirebaseAuthErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -54,7 +55,7 @@ export default function LoginPage() {
       router.push("/dashboard");
     } catch (error) {
       if (error.code !== "auth/cancelled-popup-request") {
-        alert(error.message);
+        alert(getFirebaseAuthErrorMessage(error));
       }
     } finally {
       popupInProgress.current = false;

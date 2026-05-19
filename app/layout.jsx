@@ -2,7 +2,7 @@ import "./globals.css";
 
 import {
   AuthProvider
-} from "@/context/AuthContext";
+} from "@/context/AuthContext.jsx";
 
 export default function RootLayout({
   children

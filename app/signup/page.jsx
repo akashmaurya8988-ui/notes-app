@@ -10,8 +10,9 @@ import {
 
 import {
   auth,
-  firebaseConfigError
-} from "@/firebase/config";
+  firebaseConfigError,
+  getFirebaseAuthErrorMessage
+} from "@/firebase/config.js";
 
 import { useRouter }
 from "next/navigation";
@@ -56,7 +57,7 @@ export default function SignupPage() {
 
     } catch (error) {
 
-      alert(error.message);
+      alert(getFirebaseAuthErrorMessage(error));
 
     } finally {
 

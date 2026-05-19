@@ -90,3 +90,16 @@ export const googleProvider =
   app
     ? new GoogleAuthProvider()
     : null;
+
+export const getFirebaseAuthErrorMessage = (error) => {
+  if (error?.code === "auth/unauthorized-domain") {
+    const currentDomain =
+      typeof window !== "undefined"
+        ? window.location.hostname
+        : "this app domain";
+
+    return `Firebase Auth is blocking ${currentDomain}. Add ${currentDomain} in Firebase Console > Authentication > Settings > Authorized domains, then try again.`;
+  }
+
+  return error?.message || "Authentication failed. Please try again.";
+};

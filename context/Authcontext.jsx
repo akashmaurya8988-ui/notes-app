@@ -13,7 +13,7 @@ import {
 import {
   auth,
   firebaseConfigError
-} from "@/firebase/config";
+} from "@/firebase/config.js";
 
 export const AuthContext =
 createContext();

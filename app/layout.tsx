@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import {
   AuthProvider
-} from "@/context/AuthContext";
+} from "@/context/AuthContext.jsx";
 
 export const metadata: Metadata = {
   title: "Create Next App",

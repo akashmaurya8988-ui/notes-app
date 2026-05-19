@@ -15,11 +15,11 @@ import {
 import {
   db,
   firebaseConfigError
-} from "@/firebase/config";
+} from "@/firebase/config.js";
 
 import {
   AuthContext
-} from "@/context/AuthContext";
+} from "@/context/AuthContext.jsx";
 
 import { useRouter }
 from "next/navigation";
