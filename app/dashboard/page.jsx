@@ -57,6 +57,9 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] =
   useState("");
 
+  const [isSaving, setIsSaving] =
+  useState(false);
+
   const filteredNotes =
   notes.filter((note) => {
 
@@ -75,9 +78,15 @@ export default function DashboardPage() {
   });
 
   // ADD NOTE
-  const addNote = async () => {
+  const addNote = async (event) => {
 
-    if (!title || !content) {
+    event?.preventDefault();
+
+    if (authLoading) {
+      return;
+    }
+
+    if (!title.trim() || !content.trim()) {
       return alert("Fill all fields");
     }
 
@@ -91,11 +100,13 @@ export default function DashboardPage() {
 
     try {
 
+      setIsSaving(true);
+
       await addDoc(
         collection(db, "notes"),
         {
-          title,
-          content,
+          title: title.trim(),
+          content: content.trim(),
           ownerUid: user.uid,
           ownerEmail: user.email,
           createdAt: Date.now(),
@@ -104,10 +115,21 @@ export default function DashboardPage() {
 
       setTitle("");
       setContent("");
+      setSearchQuery("");
 
     } catch (error) {
 
-      console.log(error);
+      console.error("Failed to save note:", error);
+
+      if (error?.code === "permission-denied") {
+        alert("Your Firestore rules are blocking note saves. Please sign in again or update the rules.");
+      } else {
+        alert("Could not save your note. Please try again.");
+      }
+
+    } finally {
+
+      setIsSaving(false);
 
     }
   };
@@ -273,32 +295,37 @@ export default function DashboardPage() {
 
           </div>
 
-          <input
-            type="text"
-            placeholder="Note Title"
-            value={title}
-            onChange={(e)=>
-              setTitle(e.target.value)}
-            className="mb-4 w-full rounded-2xl border border-white/10 bg-black/35 p-4 text-white outline-none transition-all placeholder:text-slate-500 focus:border-cyan-300/70 focus:ring-2 focus:ring-cyan-300/20"
-          />
+          <form onSubmit={addNote} className="w-full">
 
-          <textarea
-            placeholder="Write your note..."
-            value={content}
-            onChange={(e)=>
-              setContent(e.target.value)}
-            className="mb-4 h-40 w-full resize-none rounded-2xl border border-white/10 bg-black/35 p-4 text-white outline-none transition-all placeholder:text-slate-500 focus:border-fuchsia-300/70 focus:ring-2 focus:ring-fuchsia-300/20"
-          />
+            <input
+              type="text"
+              placeholder="Note Title"
+              value={title}
+              onChange={(e)=>
+                setTitle(e.target.value)}
+              className="mb-4 w-full rounded-2xl border border-white/10 bg-black/35 p-4 text-white outline-none transition-all placeholder:text-slate-500 focus:border-cyan-300/70 focus:ring-2 focus:ring-cyan-300/20"
+            />
 
-          <button
-            onClick={addNote}
-            className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400 px-6 py-3 font-black text-slate-950 shadow-[0_0_30px_rgba(34,211,238,0.28)] transition-all hover:bg-cyan-300">
+            <textarea
+              placeholder="Write your note..."
+              value={content}
+              onChange={(e)=>
+                setContent(e.target.value)}
+              className="mb-4 h-40 w-full resize-none rounded-2xl border border-white/10 bg-black/35 p-4 text-white outline-none transition-all placeholder:text-slate-500 focus:border-fuchsia-300/70 focus:ring-2 focus:ring-fuchsia-300/20"
+            />
 
-            <Plus size={20} />
+            <button
+              type="submit"
+              disabled={isSaving || !title.trim() || !content.trim()}
+              className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400 px-6 py-3 font-black text-slate-950 shadow-[0_0_30px_rgba(34,211,238,0.28)] transition-all hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-cyan-700/70 disabled:text-slate-300">
 
-            Add Note
+              <Plus size={20} />
 
-          </button>
+              {isSaving ? "Saving..." : "Add Note"}
+
+            </button>
+
+          </form>
 
         </section>
 

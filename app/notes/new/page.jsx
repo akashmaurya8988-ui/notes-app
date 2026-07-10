@@ -49,9 +49,15 @@ export default function NewNotePage() {
   }, [authLoading, router, user]);
 
   // CREATE NOTE
-  const createNote = async () => {
+  const createNote = async (event) => {
 
-    if (!title || !content) {
+    event?.preventDefault();
+
+    if (authLoading) {
+      return;
+    }
+
+    if (!title.trim() || !content.trim()) {
       return alert("Fill all fields");
     }
 
@@ -70,21 +76,27 @@ export default function NewNotePage() {
       await addDoc(
         collection(db, "notes"),
         {
-          title,
-          content,
+          title: title.trim(),
+          content: content.trim(),
           ownerUid: user.uid,
           ownerEmail: user.email,
           createdAt: Date.now(),
         }
       );
 
-      alert("Note Created ✅");
+      alert("Note created ✅");
 
       router.push("/dashboard");
 
     } catch (error) {
 
-      console.log(error);
+      console.error("Failed to create note:", error);
+
+      if (error?.code === "permission-denied") {
+        alert("Your Firestore rules are blocking note saves. Please sign in again or update the rules.");
+      } else {
+        alert("Could not save your note. Please try again.");
+      }
 
     } finally {
 

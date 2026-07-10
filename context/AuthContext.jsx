@@ -26,12 +26,13 @@ export const AuthProvider = ({
   useState(null);
 
   const [loading, setLoading] =
-  useState(Boolean(auth));
+  useState(true);
 
   useEffect(() => {
 
     if (!auth) {
       console.error(firebaseConfigError);
+      setLoading(false);
       return;
     }
 
